@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post
 from .forms import PostForm
+from django.utils import timezone
 
 
 # Create your views here.
@@ -10,12 +11,13 @@ def getposts(request):
    
 def add_post(request):
   if request.method == "POST":
-      # Get the details from the request
       form = PostForm(request.POST)
-      # Handle Saving to DB
       if form.is_valid():
-          form.save()
-          return redirect(getposts)
+          post = form.save(commit=False)
+          post.author = request.user
+          post.created_date = timezone.now()
+          post.save()
+          return redirect(viewpost, post.pk)
   else:
       # GET Request so just give them a blank form
       form = PostForm()    
